@@ -21,7 +21,9 @@ namespace tire {
 
         ~RenderVK();
 
-        void init(ANativeWindow *window) override;
+        void init() override;
+
+        void clean() override;
 
         void preLoop() override;
 

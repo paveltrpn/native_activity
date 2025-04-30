@@ -62,24 +62,30 @@ void testCallNonStaticArgInt(struct android_app *pApp) {
 }
 
 JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnStart(JNIEnv *jenv, jobject obj) {
-
+    renderer = new tire::RenderVK{};
 }
 
 JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnResume(JNIEnv *jenv, jobject obj) {
-
+    renderer->start();
 }
 
 JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnPause(JNIEnv *jenv, jobject obj) {
-
+    renderer->stop();
 }
 
 JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnStop(JNIEnv *jenv, jobject obj) {
-
+    delete renderer;
+    renderer = nullptr;
 }
 
 JNIEXPORT void JNICALL
 Java_nativeActivity_Render_nativeSetSurface(JNIEnv *jenv, jobject obj, jobject surface) {
-
+    if (surface != nullptr) {
+        window = ANativeWindow_fromSurface(jenv, surface);
+        renderer->setWindow(window);
+    } else {
+        ANativeWindow_release(window);
+    }
 }
 
 }

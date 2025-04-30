@@ -3,15 +3,11 @@
 #include "pipelines/shader_source.h"
 
 namespace tire {
-    RenderVK::RenderVK() {
-    }
+    RenderVK::RenderVK() = default;
 
-    RenderVK::~RenderVK() {
-        log::info("Render === native rendervk object destoyed");
-    }
+    RenderVK::~RenderVK() = default;
 
-    void RenderVK::init(ANativeWindow *window) {
-        window_ = window;
+    void RenderVK::init() {
         try {
             instance_ = std::make_unique<vk::Instance>();
             surface_ = std::make_unique<vk::Surface>(window_, instance_.get());
@@ -45,12 +41,14 @@ namespace tire {
                     vk::PresentSynchronization<FRAMES_IN_FLIGHT_COUNT>>(
                     device_.get());
 
-            displayReady_ = true;
-
-
+            ready_ = true;
         } catch (const std::runtime_error &e) {
             throw std::runtime_error(e.what());
         }
+    }
+
+    void RenderVK::clean() {
+        ready_ = false;
     }
 }
 

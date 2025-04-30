@@ -18,8 +18,8 @@ class Render : Activity(), SurfaceHolder.Callback {
 
         setContentView(R.layout.main)
 
-        // val surfaceView: SurfaceView = findViewById<SurfaceView>(R.id.surfaceview)
-        // surfaceView.getHolder().addCallback(this);
+        val surfaceView: SurfaceView = findViewById<SurfaceView>(R.id.surfaceview)
+        surfaceView.holder.addCallback(this)
 //        surfaceView.setOnClickListener(OnClickListener() {
 //            public void onClick(View view) {
 //                Toast toast = Toast.makeText(NativeEglExample.this,
