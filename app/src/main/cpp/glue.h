@@ -4,16 +4,14 @@
 #include <jni.h>
 
 extern "C" {
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnStart(JNIEnv *jenv, jobject obj);
+
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnResume(JNIEnv *jenv, jobject obj);
+
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnPause(JNIEnv *jenv, jobject obj);
+
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnStop(JNIEnv *jenv, jobject obj);
+
 JNIEXPORT void JNICALL
-Java_another_tiny_1render_TinyRender_nativeInit(JNIEnv *jenv, jobject obj);
-
-JNIEXPORT void JNICALL nativeOnStart(JNIEnv *jenv, jobject obj);
-
-JNIEXPORT void JNICALL nativeOnResume(JNIEnv *jenv, jobject obj);
-
-JNIEXPORT void JNICALL nativeOnPause(JNIEnv *jenv, jobject obj);
-
-JNIEXPORT void JNICALL nativeOnStop(JNIEnv *jenv, jobject obj);
-
-JNIEXPORT void JNICALL nativeSetSurface(JNIEnv *jenv, jobject obj, jobject surface);
+Java_nativeActivity_Render_nativeSetSurface(JNIEnv *jenv, jobject obj, jobject surface);
 }

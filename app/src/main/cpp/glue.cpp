@@ -35,7 +35,7 @@ void testCallNonStaticMethod(struct android_app *pApp) {
         return;
     }
 
-    auto classDefinition = jniEnv->FindClass("native_activity/TestLibrary");
+    auto classDefinition = jniEnv->FindClass("nativeActivity/TestLibrary");
     auto ctorId = jniEnv->GetMethodID(classDefinition, "<init>", "()V");
     auto classInstatnce = jniEnv->NewObject(classDefinition, ctorId);
     jmethodID NonStaticMethodId = jniEnv->GetMethodID(classDefinition, "nonStaticMethod", "()V");
@@ -53,7 +53,7 @@ void testCallNonStaticArgInt(struct android_app *pApp) {
         return;
     }
 
-    auto classDefinition = jniEnv->FindClass("native_activity/TestLibrary");
+    auto classDefinition = jniEnv->FindClass("nativeActivity/TestLibrary");
     auto ctorId = jniEnv->GetMethodID(classDefinition, "<init>", "()V");
     auto classInstatnce = jniEnv->NewObject(classDefinition, ctorId);
     jmethodID NonStaticMethodId = jniEnv->GetMethodID(classDefinition, "nonStaticArgInt", "(I)V");
@@ -61,23 +61,24 @@ void testCallNonStaticArgInt(struct android_app *pApp) {
     vmHandle->DetachCurrentThread();
 }
 
-JNIEXPORT void JNICALL nativeOnStart(JNIEnv *jenv, jobject obj) {
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnStart(JNIEnv *jenv, jobject obj) {
 
 }
 
-JNIEXPORT void JNICALL nativeOnResume(JNIEnv *jenv, jobject obj) {
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnResume(JNIEnv *jenv, jobject obj) {
 
 }
 
-JNIEXPORT void JNICALL nativeOnPause(JNIEnv *jenv, jobject obj) {
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnPause(JNIEnv *jenv, jobject obj) {
 
 }
 
-JNIEXPORT void JNICALL nativeOnStop(JNIEnv *jenv, jobject obj) {
+JNIEXPORT void JNICALL Java_nativeActivity_Render_nativeOnStop(JNIEnv *jenv, jobject obj) {
 
 }
 
-JNIEXPORT void JNICALL nativeSetSurface(JNIEnv *jenv, jobject obj, jobject surface) {
+JNIEXPORT void JNICALL
+Java_nativeActivity_Render_nativeSetSurface(JNIEnv *jenv, jobject obj, jobject surface) {
 
 }
 

@@ -1,4 +1,4 @@
-package native_activity
+package nativeActivity
 
 import android.util.Log
 

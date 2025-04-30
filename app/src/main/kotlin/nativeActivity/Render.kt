@@ -1,4 +1,4 @@
-package native_activity
+package nativeActivity
 
 import android.app.Activity
 import android.os.Bundle
@@ -6,7 +6,7 @@ import android.util.Log
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
-
+import  nativeActivity.Render.R
 
 class Render : Activity(), SurfaceHolder.Callback {
     init {
@@ -15,9 +15,8 @@ class Render : Activity(), SurfaceHolder.Callback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.i("TinyRender", "call NativeActivity onCreate()")
 
-        // setContentView(R.layout.main)
+        setContentView(R.layout.main)
 
         // val surfaceView: SurfaceView = findViewById<SurfaceView>(R.id.surfaceview)
         // surfaceView.getHolder().addCallback(this);
@@ -32,18 +31,22 @@ class Render : Activity(), SurfaceHolder.Callback {
 
     override fun onStart() {
         super.onStart()
+        nativeOnStart()
     }
 
     override fun onResume() {
         super.onResume()
+        nativeOnResume()
     }
 
     override fun onPause() {
         super.onPause()
+        nativeOnPause()
     }
 
     override fun onStop() {
         super.onStop()
+        nativeOnStop()
     }
 
     override fun onDestroy() {
@@ -51,14 +54,21 @@ class Render : Activity(), SurfaceHolder.Callback {
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, w: Int, h: Int) {
-        // nativeSetSurface(holder.getSurface());
+        nativeSetSurface(holder.getSurface())
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
+        nativeSetSurface(null)
     }
+
+    external fun nativeOnStart()
+    external fun nativeOnResume()
+    external fun nativeOnPause()
+    external fun nativeOnStop()
+    external fun nativeSetSurface(surface: Surface?)
 }
 
 

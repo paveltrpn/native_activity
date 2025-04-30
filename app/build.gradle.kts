@@ -4,10 +4,10 @@ plugins {
 }
 
 android {
-    namespace = "native_activity.Render"
+    namespace = "nativeActivity.Render"
     compileSdk = 35
     defaultConfig {
-        applicationId = "native_activity.Render"
+        applicationId = "nativeActivity.Render"
         minSdk = 35
         targetSdk = 35
         versionCode = 1

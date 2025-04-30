@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="native_activity.Render"
+<manifest package="nativeActivity.Render"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -12,12 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Render">
         <activity
-            android:name="native_activity.Render"
+            android:name="nativeActivity.Render"
             android:configChanges="orientation|keyboardHidden"
             android:exported="true">
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="render" />
+                android:value="native_render" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
