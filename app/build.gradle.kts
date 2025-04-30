@@ -4,10 +4,10 @@ plugins {
 }
 
 android {
-    namespace = "another.tiny_render"
+    namespace = "native_activity.Render"
     compileSdk = 35
     defaultConfig {
-        applicationId = "another.tiny_render"
+        applicationId = "native_activity.Render"
         minSdk = 35
         targetSdk = 35
         versionCode = 1
@@ -58,7 +58,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

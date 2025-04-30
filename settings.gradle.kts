@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "another_tiny_render"
+rootProject.name = "nativa_activity"
 include(":app")

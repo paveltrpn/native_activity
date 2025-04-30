@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.6.0)
 
-project(tiny_render)
+project(native_render)
 
 add_library(native_app_glue STATIC
         ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
@@ -9,7 +9,7 @@ target_include_directories(native_app_glue PUBLIC
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+# set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
 add_library(algebra
         src/main/cpp/algebra/concepts.h
@@ -32,18 +32,10 @@ add_library(tlog
 )
 target_link_libraries(tlog log)
 
-add_library(image
-        src/main/cpp/image/color.h
-        src/main/cpp/image/color.cpp
-)
-
 add_library(render
         src/main/cpp/render/render.cpp
         src/main/cpp/render/render.h
         src/main/cpp/render/vk/vulkan/vk_enum_string_helper.h
-        src/main/cpp/render/gl/rendergl.cpp
-        src/main/cpp/render/gl/rendergl.h
-        src/main/cpp/render/gl/main_loop.cpp
         src/main/cpp/render/vk/rendervk.cpp
         src/main/cpp/render/vk/rendervk.h
         src/main/cpp/render/vk/main_loop.cpp
@@ -70,7 +62,7 @@ add_library(render
         src/main/cpp/render/vk/pipelines/shader_source.cpp
         src/main/cpp/render/vk/pipelines/shader_source.h
 )
-target_link_libraries(render android native_app_glue tlog image)
+target_link_libraries(render android native_app_glue tlog)
 
 add_library(${CMAKE_PROJECT_NAME}
         SHARED
@@ -81,8 +73,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         android
         native_app_glue
         vulkan
-        EGL
-        GLESv3
         render
         tlog
 )

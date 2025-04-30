@@ -14,8 +14,6 @@
 
 static constexpr bool DEBUG_OUTPUT_COMMANDS_H{true};
 
-#include "../../../image/color.h"
-
 namespace tire::vk {
 
     struct RenderFromShader;
@@ -121,8 +119,7 @@ namespace tire::vk {
                         "vk::DrawCommand === created!");
             };
 
-            const auto cc = Colorf{"darkblue"};
-            clearColor_.color = {cc.r(), cc.g(), cc.b(), cc.a()},
+            clearColor_.color = {0.1f, 0.1f, 0.1f, 1.0f},
                     clearColor_.depthStencil = {.depth = 0.0f, .stencil = 0};
 
             width_ = device_->extent().width;

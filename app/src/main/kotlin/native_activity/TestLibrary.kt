@@ -1,4 +1,4 @@
-package another.tiny_render
+package native_activity
 
 import android.util.Log
 
