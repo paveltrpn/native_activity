@@ -39,7 +39,7 @@ namespace tire::vk {
                                 name, string_VkResult(err)));
         } else {
             log::debug<DEBUG_OUTPUT_SHADER_STORAGE_VK_CPP>(
-                    "vk::ShaderStorage == shader module {} created!", name);
+                    "vk::Program == shader module {} created!", name);
         }
 
         modules_[name] = module;
@@ -66,7 +66,7 @@ namespace tire::vk {
         // suffix - i.e. something from set "VERTEX", "FRAGMENT" etc.
         if (!isValidName(name)) {
             throw std::runtime_error(std::format(
-                    "vk::ShaderStorage == shader file name \"{}\" not satisfies naming "
+                    "vk::Program == shader file name \"{}\" not satisfies naming "
                     "convention",
                     name));
         }
@@ -74,7 +74,7 @@ namespace tire::vk {
         // Check if shader module with name exist in modules map
         if (modules_.contains(name)) {
             log::warning(
-                    "vk::ShaderStorage == shader module with name \"{}\" exist, no "
+                    "vk::Program == shader module with name \"{}\" exist, no "
                     "need "
                     "to "
                     "replace it",
@@ -103,7 +103,7 @@ namespace tire::vk {
         const auto suffix = split(name, "_").back();
         if (checkStageExist(suffix)) {
             log::warning(
-                    "vk::ShaderStorage == shader module for stage \"{}\" exist, no "
+                    "vk::Program == shader module for stage \"{}\" exist, no "
                     "need "
                     "to "
                     "replace it",

@@ -48,7 +48,7 @@ namespace tire::vk {
     }
 
     void SceneRenderCommand::prepare(VkFramebuffer framebuffer,
-                                     algebra::matrix4d view) {
+                                     algebra::matrix4f view, algebra::matrix4f model) {
         const VkCommandBufferBeginInfo beginInfo{
                 .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                 .flags = 0,
@@ -95,9 +95,13 @@ namespace tire::vk {
                           pipeline_->pipeline());
         vkCmdPushConstants(command_, pipeline_->layout(),
                            VK_SHADER_STAGE_VERTEX_BIT, 0,
-                           sizeof(algebra::matrix4d), &view);
+                           sizeof(algebra::matrix4f), &view);
 
-        vkCmdDraw(command_, 12, 3, 0, 0);
+        vkCmdPushConstants(command_, pipeline_->layout(),
+                           VK_SHADER_STAGE_VERTEX_BIT, sizeof(algebra::matrix4f),
+                           sizeof(algebra::matrix4f), &model);
+
+        vkCmdDraw(command_, 36, 3, 0, 0);
     }
 
     void SceneRenderCommand::submit(VkSemaphore waitSemaphores,

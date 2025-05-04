@@ -35,6 +35,10 @@ namespace tire {
         // NOTE: currentFrame_->imageIndex
         const auto currentFramebuffer = context_->framebuffer(currentFrame_);
 
+        renderCommand_->reset();
+        renderCommand_->prepare(currentFramebuffer, viewMatrix_, modelMatrix_);
+        renderCommand_->submit(iaSem, rfSem, ifFnc);
+
         context_->present(rfSem, &currentFrame_);
 
         currentFrame_ = (currentFrame_ + 1) % context_->framesCount();

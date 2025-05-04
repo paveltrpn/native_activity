@@ -21,9 +21,6 @@ namespace tire::vk {
     }
 
     void Pipeline::initShaderStages(const vk::Program &program) {
-        // Reserve space for all possible shader stages structs
-        shaderStages_.reserve(16);
-
         // Add VERTEX stage
         if (const auto module = program.get<ShaderStageType::VERTEX>();
                 module != VK_NULL_HANDLE) {

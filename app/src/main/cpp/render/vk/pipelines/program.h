@@ -136,7 +136,7 @@ namespace tire::vk {
             }
 
             log::warning(
-                    "vk::ShaderStorage == shader module with suffix \"{}\" not found!",
+                    "vk::Program == shader module with suffix \"{}\" not found!",
                     suffix);
 
             return VK_NULL_HANDLE;

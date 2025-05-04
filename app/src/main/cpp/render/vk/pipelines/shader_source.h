@@ -2,6 +2,68 @@
 #pragma once
 
 #include "stdint.h"
+/*
+#version 450
+layout( location = 0 ) out vec3 fragColor;
+layout( location = 1 ) out vec3 vLighting;
+layout( push_constant ) uniform transformations_t {
+        mat4 view;
+        mat4 rtn;
+}
+transformations;
+vec3 positions[36] = vec3[](
+        vec3( -0.5, 0.5, -0.5 ), vec3( 0.5, 0.5, 0.5 ), vec3( 0.5, 0.5, -0.5 ),
+        vec3( 0.5, 0.5, 0.5 ), vec3( -0.5, -0.5, 0.5 ), vec3( 0.5, -0.5, 0.5 ),
+        vec3( -0.5, 0.5, 0.5 ), vec3( -0.5, -0.5, -0.5 ), vec3( -0.5, -0.5, 0.5 ),
+        vec3( 0.5, -0.5, -0.5 ), vec3( -0.5, -0.5, 0.5 ), vec3( -0.5, -0.5, -0.5 ),
+        vec3( 0.5, 0.5, -0.5 ), vec3( 0.5, -0.5, 0.5 ), vec3( 0.5, -0.5, -0.5 ),
+        vec3( -0.5, 0.5, -0.5 ), vec3( 0.5, -0.5, -0.5 ), vec3( -0.5, -0.5, -0.5 ),
+        vec3( -0.5, 0.5, -0.5 ), vec3( -0.5, 0.5, 0.5 ), vec3( 0.5, 0.5, 0.5 ),
+        vec3( 0.5, 0.5, 0.5 ), vec3( -0.5, 0.5, 0.5 ), vec3( -0.5, -0.5, 0.5 ),
+        vec3( -0.5, 0.5, 0.5 ), vec3( -0.5, 0.5, -0.5 ), vec3( -0.5, -0.5, -0.5 ),
+        vec3( 0.5, -0.5, -0.5 ), vec3( 0.5, -0.5, 0.5 ), vec3( -0.5, -0.5, 0.5 ),
+        vec3( 0.5, 0.5, -0.5 ), vec3( 0.5, 0.5, 0.5 ), vec3( 0.5, -0.5, 0.5 ),
+        vec3( -0.5, 0.5, -0.5 ), vec3( 0.5, 0.5, -0.5 ), vec3( 0.5, -0.5, -0.5 ) );
+vec3 normals[36] = vec3[](
+        vec3( -0.0, 1.0, -0.0 ), vec3( -0.0, 1.0, -0.0 ), vec3( -0.0, 1.0, -0.0 ),
+        vec3( -0.0, -0.0, 1.0 ), vec3( -0.0, -0.0, 1.0 ), vec3( -0.0, -0.0, 1.0 ),
+        vec3( -1.0, -0.0, -0.0 ), vec3( -1.0, -0.0, -0.0 ),
+        vec3( -1.0, -0.0, -0.0 ), vec3( -0.0, -1.0, -0.0 ),
+        vec3( -0.0, -1.0, -0.0 ), vec3( -0.0, -1.0, -0.0 ), vec3( 1.0, -0.0, -0.0 ),
+        vec3( 1.0, -0.0, -0.0 ), vec3( 1.0, -0.0, -0.0 ), vec3( -0.0, -0.0, -1.0 ),
+        vec3( -0.0, -0.0, -1.0 ), vec3( -0.0, -0.0, -1.0 ), vec3( -0.0, 1.0, -0.0 ),
+        vec3( -0.0, 1.0, -0.0 ), vec3( -0.0, 1.0, -0.0 ), vec3( -0.0, -0.0, 1.0 ),
+        vec3( -0.0, -0.0, 1.0 ), vec3( -0.0, -0.0, 1.0 ), vec3( -1.0, -0.0, -0.0 ),
+        vec3( -1.0, -0.0, -0.0 ), vec3( -1.0, -0.0, -0.0 ),
+        vec3( -0.0, -1.0, -0.0 ), vec3( -0.0, -1.0, -0.0 ),
+        vec3( -0.0, -1.0, -0.0 ), vec3( 1.0, -0.0, -0.0 ), vec3( 1.0, -0.0, -0.0 ),
+        vec3( 1.0, -0.0, -0.0 ), vec3( -0.0, -0.0, -1.0 ), vec3( -0.0, -0.0, -1.0 ),
+        vec3( -0.0, -0.0, -1.0 ) );
+vec3 color = vec3( 1.0, 0.0, 0.0 );
+vec3 ambientLight = vec3( 0.3, 0.3, 0.3 );
+vec3 lightcolor = vec3( 1.0, 1.0, 1.0 );
+vec3 directionalVector = normalize( vec3( 0.0, 0.0, -5.0 ) );
+void main() {
+    vec4 nrmTransformed = inverse( transformations.rtn ) * vec4( normals[gl_VertexIndex], 0.0 );
+    float directional =
+            max( dot( nrmTransformed.xyz, directionalVector ), 0.0 );
+    vLighting = ambientLight + ( lightcolor * directional );
+    vec4 rotated = transformations.rtn * vec4( positions[gl_VertexIndex], 1.0 );
+    gl_Position = transformations.view * rotated;
+    fragColor = color;
+}
+*/
+
+/*
+#version 450
+layout( location = 0 ) in vec3 fragColor;
+layout( location = 1 ) in vec3 vLighting;
+layout( location = 0 ) out vec4 outColor;
+void main() {
+    outColor = vec4(fragColor.rgb*vLighting, 1.0f);
+    // outColor = vec4( fragColor, 1.0 );
+}
+*/
 
 namespace tire::vk {
     static uint8_t vk_simple_box_VERTEX[] = {0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0B,
@@ -421,6 +483,7 @@ namespace tire::vk {
                                              0x24, 0x00, 0x00, 0x00, 0x3E, 0x00, 0x03, 0x00, 0x6A,
                                              0x00, 0x00, 0x00, 0x6B, 0x00, 0x00, 0x00,
                                              0xFD, 0x00, 0x01, 0x00, 0x38, 0x00, 0x01, 0x00};
+
     static uint8_t vk_simple_box_FRAGMENT[] = {0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0B,
                                                0x00, 0x0D, 0x00, 0x16, 0x00, 0x00, 0x00,
                                                0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01,

@@ -28,7 +28,7 @@ namespace tire::vk {
 
         void reset();
 
-        void prepare(VkFramebuffer framebuffer, algebra::matrix4d view);
+        void prepare(VkFramebuffer framebuffer, algebra::matrix4f view, algebra::matrix4f model);
 
         void submit(VkSemaphore waitSemaphores, VkSemaphore signalSemaphores,
                     VkFence fence);

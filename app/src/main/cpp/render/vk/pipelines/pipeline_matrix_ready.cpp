@@ -2,6 +2,7 @@
 #include "../vulkan/vk_enum_string_helper.h"
 #include "pipeline.h"
 #include "../../../log/log.h"
+#include "../../../algebra/matrix4.h"
 
 namespace tire::vk {
 
@@ -27,10 +28,10 @@ namespace tire::vk {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
                 .pNext = nullptr,
                 .flags = 0,
-                .depthClampEnable = VK_FALSE,
+                .depthClampEnable = VK_TRUE,
                 .rasterizerDiscardEnable = VK_FALSE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
-                .cullMode = VK_CULL_MODE_BACK_BIT,
+                .cullMode = VK_CULL_MODE_NONE,
                 .frontFace = VK_FRONT_FACE_CLOCKWISE,
                 .depthBiasEnable = VK_FALSE,
                 .depthBiasConstantFactor = 0.0f,
@@ -71,7 +72,9 @@ namespace tire::vk {
                 .blendConstants = {0.0f, 0.0f, 0.0f, 0.0f}};
 
         const std::vector<VkDynamicState> dynamicStates = {
-                VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
+                VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR,
+                VK_DYNAMIC_STATE_LINE_WIDTH};
+
         const VkPipelineDynamicStateCreateInfo dynamicState{
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
                 .pNext = nullptr,
@@ -84,6 +87,24 @@ namespace tire::vk {
         // This pipeline renderpass initialization
         renderPass_ = initRenderpass();
 
+        VkPipelineViewportStateCreateInfo viewportState{};
+        viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportState.viewportCount = 1;
+        viewportState.scissorCount = 1;
+
+        VkPipelineDepthStencilStateCreateInfo depthStencil{};
+        depthStencil.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        depthStencil.depthTestEnable = VK_TRUE;
+        depthStencil.depthWriteEnable = VK_TRUE;
+        depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
+        depthStencil.depthBoundsTestEnable = VK_FALSE;
+        depthStencil.minDepthBounds = 0.0f;
+        depthStencil.maxDepthBounds = 1.0f;
+        depthStencil.stencilTestEnable = VK_FALSE;
+        depthStencil.front = {};
+        depthStencil.back = {};
+
         // Create pipeline
         const VkGraphicsPipelineCreateInfo pipelineInfo{
                 .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -91,12 +112,12 @@ namespace tire::vk {
                 .pStages = shaderStages_.data(),
                 .pVertexInputState = &vertexInput,
                 .pInputAssemblyState = &inputAssembly,
-                .pViewportState = nullptr,
+                .pViewportState = &viewportState,
                 .pRasterizationState = &rasterizer,
                 .pMultisampleState = &multisampling,
-                .pDepthStencilState = nullptr,
+                .pDepthStencilState =  &depthStencil,
                 .pColorBlendState = &colorBlending,
-                .pDynamicState = nullptr,
+                .pDynamicState = &dynamicState,
                 .layout = layout_,
                 .renderPass = renderPass_,
                 .subpass = 0,
@@ -122,17 +143,18 @@ namespace tire::vk {
 
     VkPipelineLayout PiplineMatrixReady::initLayout() {
         //setup push constants
-        VkPushConstantRange viewRtnMatrix{
+        std::array<VkPushConstantRange, 1> constants;
+        constants[0] = VkPushConstantRange{
                 .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
                 .offset = 0,
-                .size = (sizeof(float) * 16 * 2) + 4};  // two matrix4f
+                .size =  (sizeof(float) * 16 * 2) + 4};
 
         const VkPipelineLayoutCreateInfo pipelineLayoutInfo{
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
                 .setLayoutCount = 0,
                 .pSetLayouts = nullptr,
-                .pushConstantRangeCount = 1,
-                .pPushConstantRanges = &viewRtnMatrix};
+                .pushConstantRangeCount = constants.size(),
+                .pPushConstantRanges = constants.data()};
 
         VkPipelineLayout layout{VK_NULL_HANDLE};
 
@@ -232,5 +254,5 @@ namespace tire::vk {
 
         return renderPass;
     }
-    
+
 }  // namespace tire::vk
