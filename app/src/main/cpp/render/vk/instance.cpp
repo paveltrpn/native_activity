@@ -61,8 +61,8 @@ namespace tire::vk {
 #define CONFIG_APPLAICATION_NAME "application_name"
         const std::string applicationName = CONFIG_APPLAICATION_NAME;
 
-#define CONFIG_ENAGINE_NAME "engine_name"
-        const std::string engineName = CONFIG_ENAGINE_NAME;
+#define CONFIG_ENGINE_NAME "engine_name"
+        const std::string engineName = CONFIG_ENGINE_NAME;
 
         const VkApplicationInfo appInfo{
                 .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -97,11 +97,11 @@ namespace tire::vk {
         }
 
         // Vulkan vlidation layers list to enable
-#define CONFIG_ENABLE_VALIDATION_LAYERS true
+#define CONFIG_ENABLE_VALIDATION_LAYERS false
         if (CONFIG_ENABLE_VALIDATION_LAYERS) {
             desiredValidationLayerList_.push_back("VK_LAYER_KHRONOS_validation");
 
-#define  CONFIG_ENABLE_ADDITIONAL_VALIDATION_LAYERS true
+#define  CONFIG_ENABLE_ADDITIONAL_VALIDATION_LAYERS false
             if (CONFIG_ENABLE_ADDITIONAL_VALIDATION_LAYERS) {
                 desiredValidationLayerList_.emplace_back(
                         "VK_LAYER_KHRONOS_profiles");
@@ -125,7 +125,7 @@ namespace tire::vk {
             }
 
             // NOTE: "VK_LAYER_RENDERDOC_Capture" must be available in system to use renderdoc
-#define CONFIG_ENABLE_API_DUNMP_VALIDATION_LAYRES true
+#define CONFIG_ENABLE_API_DUNMP_VALIDATION_LAYRES false
             if (CONFIG_ENABLE_API_DUNMP_VALIDATION_LAYRES) {
                 desiredValidationLayerList_.emplace_back(
                         "VK_LAYER_LUNARG_api_dump");
@@ -160,7 +160,7 @@ namespace tire::vk {
                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
 
-#define CONFIG_VERBOSE_VULKAN_OUTPUT true
+#define CONFIG_VERBOSE_VULKAN_OUTPUT false
         if (CONFIG_VERBOSE_VULKAN_OUTPUT) {
             debugUtilsMessageTypeFlagBits =
                     (VkDebugUtilsMessageTypeFlagBitsEXT) (
@@ -191,7 +191,7 @@ namespace tire::vk {
         // Vulkan instance extensions list
         std::vector<const char *> desiredInstanceExtensionsList{};
         desiredInstanceExtensionsList.emplace_back("VK_KHR_surface");
-        desiredInstanceExtensionsList.emplace_back("VK_KHR_xlib_surface");
+        desiredInstanceExtensionsList.emplace_back("VK_KHR_android_surface");
 
 
         if (CONFIG_ENABLE_VALIDATION_LAYERS) {
