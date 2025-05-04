@@ -245,7 +245,6 @@ void Context::makeDevice() {
     //
     // Force use validation layers
 
-#define CONFIG_ENABLE_VALIDATION_LAYERS false
     if ( CONFIG_ENABLE_VALIDATION_LAYERS ) {
         deviceCreateInfo.enabledLayerCount =
             static_cast<uint32_t>( desiredValidationLayerList_.size() );

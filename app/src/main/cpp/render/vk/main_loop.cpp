@@ -47,7 +47,9 @@ namespace tire {
                                                        25.0f);
         const auto viewMatrix = offset * proj;
         angle_ += timer_.floatFrameDuration() * 25.0f;
-        const auto modelMatrix = algebra::rotate({0.0f, 1.0f, 0.0f}, angle_);
+        algebra::vector3f ax{0.0f, 1.0f, 1.0f};
+        ax.normalizeSelf();
+        const auto modelMatrix = algebra::rotate(ax, angle_);
         // =================================
 
         renderCommand_->reset();

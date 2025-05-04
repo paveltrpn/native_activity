@@ -145,7 +145,7 @@ namespace tire::vk {
         // rendering is slower than vsync. Consider setting minImageCount to 3 to use
         // triple buffering to maximize performance in such cases.
         // Skip all logic above, just use value from config
-#define CONFIG_FRAMES_COUNT 3
+
         framesCount_ = CONFIG_FRAMES_COUNT;
 
         if ((framesCount_ < surfaceCapabilities_.minImageCount) ||
