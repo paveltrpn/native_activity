@@ -11,4 +11,4 @@ The Kotlin code provides the surface to the native thread, enabling Vulkan rende
 The core concept of this implementation is inspired by the example 
 at https://github.com/tsaarni/android-native-egl-example , adapted for Vulkan.
 
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![alt text](https://github.com/paveltrpn/native_activity/blob/master/screenshot.png?raw=true)
