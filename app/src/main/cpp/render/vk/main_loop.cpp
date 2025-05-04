@@ -7,11 +7,12 @@
 namespace tire {
 
     void RenderVK::preLoop() {
-    };
+    }
 
     void RenderVK::preFrame() {
-
-    };
+        // Update global timer
+        timer_.update();
+    }
 
     void RenderVK::frame() {
         const auto [iaSem, rfSem, ifFnc] =
@@ -35,27 +36,41 @@ namespace tire {
         // NOTE: currentFrame_->imageIndex
         const auto currentFramebuffer = context_->framebuffer(currentFrame_);
 
+        // =================================
+        // Get transformation matricies
+        auto offset = algebra::translate(0.0f, 0.0f, -5.0f);
+        offset.transposeSelf();
+
+        const auto [width, height] = context_->currentExtent();
+        const auto proj = algebra::vperspective<float>(50.0f, static_cast<float>(width) /
+                                                              static_cast<float>(height), 0.1f,
+                                                       25.0f);
+        const auto viewMatrix = offset * proj;
+        angle_ += timer_.floatFrameDuration() * 25.0f;
+        const auto modelMatrix = algebra::rotate({0.0f, 1.0f, 0.0f}, angle_);
+        // =================================
+
         renderCommand_->reset();
-        renderCommand_->prepare(currentFramebuffer, viewMatrix_, modelMatrix_);
+        renderCommand_->prepare(currentFramebuffer, viewMatrix, modelMatrix);
         renderCommand_->submit(iaSem, rfSem, ifFnc);
 
         context_->present(rfSem, &currentFrame_);
 
         currentFrame_ = (currentFrame_ + 1) % context_->framesCount();
-    };
+    }
 
     void RenderVK::postFrame() {
 
-    };
+    }
 
     void RenderVK::swapBuffers() {
 
-    };
+    }
 
     void RenderVK::postLoop() {
         // we should wait for the logical device to finish operations
         // before exiting mainLoop and destroying the window
         vkDeviceWaitIdle(context_->device());
-    };
+    }
 
 }  // namespace tire

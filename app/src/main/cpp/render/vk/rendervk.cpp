@@ -29,13 +29,6 @@ namespace tire {
             renderCommand_ = std::make_unique<vk::SceneRenderCommand>(context_.get(),
                                                                       piplineMatrixReady_.get());
 
-            auto offset = algebra::translate(0.0f, 0.0f, -10.0f);
-            offset.transposeSelf();
-            const auto proj = algebra::vperspective<float>(50.0f, 1.77f, 0.1f, 100.0f);
-            viewMatrix_ = offset * proj;
-
-            modelMatrix_.idtt();
-            
             ready_ = true;
         } catch (const std::runtime_error &e) {
             throw std::runtime_error(e.what());

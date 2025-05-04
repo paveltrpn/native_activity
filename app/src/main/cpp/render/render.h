@@ -6,6 +6,8 @@
 
 #include <android_native_app_glue.h>
 
+#include "timer.h"
+
 namespace tire {
     struct Render {
         Render();
@@ -23,7 +25,7 @@ namespace tire {
         virtual void init() = 0;
 
         virtual void clean() = 0;
-        
+
         virtual void preLoop() = 0;
 
         void setWindow(ANativeWindow *window);
@@ -50,6 +52,7 @@ namespace tire {
     protected:
         ANativeWindow *window_{};
         bool ready_{false};
+        Timer timer_{};
 
     private:
         enum class RenderThreadMessage {

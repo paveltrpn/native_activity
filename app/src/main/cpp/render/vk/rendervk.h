@@ -41,8 +41,7 @@ namespace tire {
 
         std::unique_ptr<vk::SceneRenderCommand> renderCommand_{};
 
-        algebra::matrix4f viewMatrix_{};
-        algebra::matrix4f modelMatrix_{};
+        float angle_{};
 
         uint32_t currentFrame_{0};
     };

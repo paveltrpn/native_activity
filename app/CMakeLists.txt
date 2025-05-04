@@ -36,6 +36,8 @@ target_link_libraries(tlog log)
 add_library(render
         src/main/cpp/render/render.cpp
         src/main/cpp/render/render.h
+        src/main/cpp/render/timer.cpp
+        src/main/cpp/render/timer.h
         src/main/cpp/render/vk/vulkan/vk_enum_string_helper.h
         src/main/cpp/render/vk/rendervk.cpp
         src/main/cpp/render/vk/rendervk.h
