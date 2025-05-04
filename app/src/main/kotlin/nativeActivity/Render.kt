@@ -3,10 +3,10 @@ package nativeActivity
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import android.view.Surface;
-import android.view.SurfaceView;
-import android.view.SurfaceHolder;
-import  nativeActivity.Render.R
+import android.view.Surface
+import android.view.SurfaceView
+import android.view.SurfaceHolder
+import nativeActivity.Render.R
 
 class Render : Activity(), SurfaceHolder.Callback {
     init {

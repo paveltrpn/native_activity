@@ -1,5 +1,6 @@
 
 #include "rendervk.h"
+#include "pipelines/program.h"
 #include "pipelines/shader_source.h"
 
 namespace tire {
@@ -9,37 +10,21 @@ namespace tire {
 
     void RenderVK::init() {
         try {
-            instance_ = std::make_unique<vk::Instance>();
-            surface_ = std::make_unique<vk::Surface>(window_, instance_.get());
-            device_ = std::make_unique<vk::Device>(instance_.get(), surface_.get());
-            device_->pickAndCreateDevice();
-            swapchain_ =
-                    std::make_unique<vk::Swapchain>(device_.get(), surface_.get());
-            swapchain_->createSwapchain();
-            swapchain_->createImageViews();
+            context_ = std::make_unique<vk::Context>(window_);
+            context_->init();
+
             piplineMatrixReady_ =
-                    std::make_unique<vk::PiplineMatrixReady>(device_.get());
-            piplineMatrixReady_->initPipeline(
-                    {{vk::vk_simple_box_VERTEX,   "vk_simple_box_VERTEX"},
-                     {vk::vk_simple_box_FRAGMENT, "vk_simple_box_FRAGMENT"}});
+                    std::make_unique<vk::PiplineMatrixReady>(context_.get());
 
-            swapchain_->createFramebuffers(piplineMatrixReady_.get());
+            auto program = vk::Program{context_.get()};
+            program.fill(
+                    {{vk::vk_simple_box_VERTEX,   vk::vertex_stage_suffix},
+                     {vk::vk_simple_box_FRAGMENT, vk::fragment_stage_suffix}});
 
-            commandPool_ = std::make_unique<vk::CommandPool>(device_.get());
+            piplineMatrixReady_->initShaderStages(program);
+            piplineMatrixReady_->buildPipeline();
 
-            // Create command buffers for each frame
-            cBufs_.reserve(FRAMES_IN_FLIGHT_COUNT);
-            for (auto i = 0; i < cBufs_.capacity(); ++i) {
-                cBufs_.push_back(std::make_unique<vk::RenderFromShader>(
-                        device_.get(), commandPool_.get()));
-            }
-
-            present_ =
-                    std::make_unique<vk::Present>(device_.get(), swapchain_.get());
-
-            presentSync_ = std::make_unique<
-                    vk::PresentSynchronization<FRAMES_IN_FLIGHT_COUNT>>(
-                    device_.get());
+            context_->makeFrames(piplineMatrixReady_.get());
 
             ready_ = true;
         } catch (const std::runtime_error &e) {

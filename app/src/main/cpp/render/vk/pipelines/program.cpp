@@ -2,35 +2,36 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
+
 #include "../vulkan/vk_enum_string_helper.h"
 
-#include "shader_storage.h"
+#include "program.h"
 #include "../../../log/log.h"
 
 static constexpr bool DEBUG_OUTPUT_SHADER_STORAGE_VK_CPP{true};
 
 namespace tire::vk {
 
-    ShaderStorage::ShaderStorage(const vk::Device *device)
-            : device_{device} {
+    Program::Program(const vk::Context *context)
+            : context_{context} {
     }
 
-    ShaderStorage::~ShaderStorage() {
+    Program::~Program() {
         for (const auto &module: modules_) {
-            vkDestroyShaderModule(device_->handle(), std::get<1>(module),
+            vkDestroyShaderModule(context_->device(), std::get<1>(module),
                                   nullptr);
         }
     }
 
-    void ShaderStorage::push(std::span<uint8_t> bytecode, const std::string &name) {
-// Create vulkan shader module
+    void Program::push(std::span<uint8_t> bytecode, const std::string &name) {
+        // Create vulkan shader module
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = bytecode.size();
         createInfo.pCode = reinterpret_cast<const uint32_t *>( bytecode.data());
 
         VkShaderModule module;
-        if (const auto err = vkCreateShaderModule(device_->handle(), &createInfo,
+        if (const auto err = vkCreateShaderModule(context_->device(), &createInfo,
                                                   nullptr, &module);
                 err != VK_SUCCESS) {
             throw std::runtime_error(
@@ -44,8 +45,8 @@ namespace tire::vk {
         modules_[name] = module;
     }
 
-    void ShaderStorage::add(const std::filesystem::path &path) {
-        if (device_->handle() == VK_NULL_HANDLE) {
+    void Program::add(const std::filesystem::path &path) {
+        if (context_->device() == VK_NULL_HANDLE) {
             throw std::runtime_error(std::format(
                     "can't use shaders before valid logical device is acquired!"));
         }
@@ -57,7 +58,7 @@ namespace tire::vk {
         }
 
         // Future shader name, comes from filename. Have format:
-        // "vk_{some_name}_STAGETYPE, where _STAGETYPE suffix is
+        // "vk_{someNname}_STAGETYPE, where _STAGETYPE suffix is
         // something from well defined set.
         const auto name = path.stem().string();
 
@@ -113,21 +114,23 @@ namespace tire::vk {
         const long long fileSize = file.tellg();
         std::vector<char> charBuf(fileSize);
         file.seekg(0);
-        file.read(charBuf.data(), static_cast<int>(fileSize));
+        file.read(charBuf.data(), static_cast<int>( fileSize ));
         file.close();
 
+        // Cast file data readed as char to vulkan acceptable uint8_t
         std::vector<uint8_t> uint8Buf(fileSize);
-        std::transform(charBuf.begin(), charBuf.end(), uint8Buf.begin(),
-                       [](char v) { return static_cast<uint8_t>(v); });
+        std::ranges::transform(
+                charBuf.begin(), charBuf.end(), uint8Buf.begin(),
+                [](char v) { return static_cast<uint8_t>( v ); });
 
         push(uint8Buf, name);
     }
 
-    void ShaderStorage::add(std::span<uint8_t> bytecode, const std::string &name) {
+    void Program::add(std::span<uint8_t> bytecode, const std::string &name) {
         push(bytecode, name);
     }
 
-    void ShaderStorage::fill(const std::vector<std::filesystem::path> &files) {
+    void Program::fill(const std::vector<std::filesystem::path> &files) {
         if (files.size() < 2) {
             throw std::runtime_error(std::format(
                     "vk::ShaderStorage == pipeline shader storage must "
@@ -139,8 +142,8 @@ namespace tire::vk {
         }
     }
 
-    void
-    ShaderStorage::fill(const std::vector<std::pair<std::span<uint8_t>, std::string>> &sources) {
+    void Program::fill(
+            const std::vector<std::pair<std::span<uint8_t>, std::string>> &sources) {
         if (sources.size() < 2) {
             throw std::runtime_error(std::format(
                     "vk::ShaderStorage == pipeline shader storage must "
@@ -153,7 +156,7 @@ namespace tire::vk {
         }
     }
 
-    VkShaderModule ShaderStorage::get(const std::string &name) {
+    VkShaderModule Program::get(const std::string &name) {
         VkShaderModule module;
         try {
             module = modules_.at(name);
@@ -164,7 +167,7 @@ namespace tire::vk {
         return module;
     }
 
-    void ShaderStorage::destroy(const std::string &name) {
+    void Program::destroy(const std::string &name) {
         VkShaderModule module;
         try {
             module = modules_.at(name);
@@ -172,18 +175,18 @@ namespace tire::vk {
             log::warning("module {} not exist!", name);
             return;
         }
-        vkDestroyShaderModule(device_->handle(), module, nullptr);
+        vkDestroyShaderModule(context_->device(), module, nullptr);
         modules_.erase(name);
     }
 
-    void ShaderStorage::list() {
+    void Program::list() {
         for (const auto &key: modules_) {
             log::debug<DEBUG_OUTPUT_SHADER_STORAGE_VK_CPP>(
                     "available shader module: \"{}\"", std::get<0>(key));
         }
     }
 
-    bool ShaderStorage::checkStageExist(const std::string stageSuffix) {
+    bool Program::checkStageExist(const std::string &stageSuffix) {
         // Find shader stage module name in modules_ which have certain suffix
         const auto end = modules_.cend();
         const auto it = std::find_if(
@@ -195,7 +198,7 @@ namespace tire::vk {
         return it != end;
     }
 
-    bool ShaderStorage::isValidName(const std::string name) {
+    bool Program::isValidName(const std::string &name) {
         // Finds out that given shader file name contains somthing from
         // shader stage suffix set ("VERTEX", "FRAGMENT" etc.)
         const auto end = StagesSuffixMap.cend();

@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_library(algebra
         src/main/cpp/algebra/concepts.h
+        src/main/cpp/algebra/common.h
         src/main/cpp/algebra/matrix.h
         src/main/cpp/algebra/matrix2.h
         src/main/cpp/algebra/matrix3.h
@@ -39,27 +40,18 @@ add_library(render
         src/main/cpp/render/vk/rendervk.cpp
         src/main/cpp/render/vk/rendervk.h
         src/main/cpp/render/vk/main_loop.cpp
+        src/main/cpp/render/vk/context.cpp
         src/main/cpp/render/vk/instance.cpp
-        src/main/cpp/render/vk/instance.h
+        src/main/cpp/render/vk/context.h
         src/main/cpp/render/vk/device.cpp
-        src/main/cpp/render/vk/device.h
-        src/main/cpp/render/vk/surface.cpp
-        src/main/cpp/render/vk/surface.h
-        src/main/cpp/render/vk/present.cpp
-        src/main/cpp/render/vk/present.h
         src/main/cpp/render/vk/swapchain.cpp
-        src/main/cpp/render/vk/swapchain.h
-        src/main/cpp/render/vk/command_pool.cpp
-        src/main/cpp/render/vk/command_pool.h
-        src/main/cpp/render/vk/commands/commands.cpp
-        src/main/cpp/render/vk/commands/commands.h
+        src/main/cpp/render/vk/commands/scene_render_command.cpp
+        src/main/cpp/render/vk/commands/scene_render_command.cpp
         src/main/cpp/render/vk/pipelines/pipeline.cpp
+        src/main/cpp/render/vk/pipelines/pipeline_matrix_ready.cpp
         src/main/cpp/render/vk/pipelines/pipeline.h
-        src/main/cpp/render/vk/pipelines/renderpass.cpp
-        src/main/cpp/render/vk/pipelines/renderpass.h
-        src/main/cpp/render/vk/pipelines/shader_storage.cpp
-        src/main/cpp/render/vk/pipelines/shader_storage.h
-        src/main/cpp/render/vk/pipelines/shader_source.cpp
+        src/main/cpp/render/vk/pipelines/program.cpp
+        src/main/cpp/render/vk/pipelines/program.h
         src/main/cpp/render/vk/pipelines/shader_source.h
 )
 target_link_libraries(render android native_app_glue tlog)

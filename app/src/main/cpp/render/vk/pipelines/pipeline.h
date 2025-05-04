@@ -3,14 +3,13 @@
 
 #include <vulkan/vulkan.h>
 
-#include "../device.h"
-#include "shader_storage.h"
-#include "renderpass.h"
+#include "../context.h"
+#include "program.h"
 
 namespace tire::vk {
 
     struct Pipeline {
-        Pipeline(const vk::Device *device);
+        Pipeline(const vk::Context *context);
 
         Pipeline(const Pipeline &other) = delete;
 
@@ -26,43 +25,46 @@ namespace tire::vk {
 
         [[nodiscard]] VkPipelineLayout layout() const { return layout_; };
 
-        [[nodiscard]] VkRenderPass renderpass() const {
-            return renderpass_->handle();
-        }
+        [[nodiscard]] VkRenderPass renderpass() const { return renderPass_; }
 
-        virtual void
-        initPipeline(const std::vector<std::pair<std::span<uint8_t>, std::string>> &sources);
+        virtual void buildPipeline() = 0;
+
+        // Call this manually before buildPipeline()
+        void initShaderStages(const vk::Program &program);
 
     protected:
+        // Each pipeline can have unique layout
         [[nodiscard]] virtual VkPipelineLayout initLayout() = 0;
 
+        // Each pipeline can have unique renderpass
+        [[nodiscard]] virtual VkRenderPass initRenderpass() = 0;
+
     protected:
-        const vk::Device *device_;
-        std::unique_ptr<vk::ShaderStorage> shaderStorage_;
-        std::unique_ptr<vk::RenderpassBase> renderpass_;
+        const vk::Context *context_;
 
         VkPipeline pipeline_{VK_NULL_HANDLE};
         VkPipelineLayout layout_{VK_NULL_HANDLE};
+        VkRenderPass renderPass_{VK_NULL_HANDLE};
+
+        std::vector<VkPipelineShaderStageCreateInfo> shaderStages_{};
     };
 
-// =====================================================================================
-
-    struct PiplineSimple final : Pipeline {
-        PiplineSimple(const vk::Device *device)
-                : Pipeline(device) {}
-
-    private:
-        VkPipelineLayout initLayout() override;
-    };
-
-// =====================================================================================
+    // =====================================================================================
 
     struct PiplineMatrixReady final : Pipeline {
-        PiplineMatrixReady(const vk::Device *device)
-                : Pipeline(device) {}
+        PiplineMatrixReady(const vk::Context *context)
+                : Pipeline(context) {}
+
+    public:
+        void buildPipeline() override;
 
     private:
+        // Access to descriptor sets from a pipeline is accomplished through a pipeline layout.
+        // Zero or more descriptor set layouts and zero or more push constant ranges are combined
+        // to form a pipeline layout object describing the complete set of resources
+        // that can be accessed by a pipeline.
         VkPipelineLayout initLayout() override;
-    };
 
+        VkRenderPass initRenderpass() override;
+    };
 }  // namespace tire::vk

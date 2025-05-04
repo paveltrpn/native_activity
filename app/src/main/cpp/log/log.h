@@ -5,6 +5,7 @@
 #include <string>
 #include <format>
 #include <source_location>
+#include <exception>
 
 #include <android/log.h>
 
@@ -39,6 +40,17 @@ namespace tire::log {
             const std::string out = std::vformat(msg.get(), std::make_format_args(args...));
             __android_log_write(ANDROID_LOG_ERROR, "", out.c_str());
         }
+    }
+
+    template<typename... Ts>
+    void fatal(std::format_string<Ts...> msg, Ts &&...args) {
+        constexpr char preamble[] = "\033[3;31m[fatal] \033[0m\t";
+        std::cout << preamble
+                  << std::vformat(msg.get(), std::make_format_args(args...))
+                  << "\n";
+
+        // Terminate
+        std::terminate();
     }
 
     void print_source(

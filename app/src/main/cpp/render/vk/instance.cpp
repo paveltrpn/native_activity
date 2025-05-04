@@ -1,9 +1,12 @@
 
-#include <iostream>
+#include <format>
 
-#include "instance.h"
 #include "vulkan/vk_enum_string_helper.h"
+
+#include "context.h"
 #include "../../log/log.h"
+
+static constexpr bool DEBUG_OUTPUT_INSTANCE_CPP{true};
 
 namespace tire::vk {
 
@@ -12,99 +15,129 @@ namespace tire::vk {
 #define STRING_WARNING "\033[33m"
 #define STRING_ERROR "\033[36m"
 
-    static VKAPI_ATTR VkBool32 VKAPI_CALL
-    debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                  VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-                  const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-                  void *pUserData) {
-        const std::string message{pCallbackData->pMessage};
+    namespace {
 
-        if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
-            const std::string out = std::format("{}", STRING_INFO + message + STRING_RESET);
-            std::cout << out;
+        static VKAPI_ATTR VkBool32 VKAPI_CALL
+        debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                      VkDebugUtilsMessageTypeFlagsEXT messageTypes,
+                      const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+                      void *pUserData) {
+            const std::string message{pCallbackData->pMessage};
 
+            if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+                std::cout << std::format("{}\n\n",
+                                         STRING_INFO + message + STRING_RESET);
+            }
+
+            if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+                std::cout << std::format("{}\n\n",
+                                         STRING_WARNING + message + STRING_RESET);
+            }
+
+            if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+                std::cout << std::format("{}\n\n",
+                                         STRING_ERROR + message + STRING_RESET);
+            }
+
+            return VK_FALSE;
         }
 
-        if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-            const std::string out = std::format("{}", STRING_WARNING + message + STRING_RESET);
-            std::cout << out;
+        static VkResult vkCreateDebugUtilsMessenger(
+                VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+                const VkAllocationCallbacks *pAllocator,
+                VkDebugUtilsMessengerEXT *pDebugMessenger) {
+            auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
+                    instance, "vkCreateDebugUtilsMessengerEXT");
+            if (func != nullptr) {
+                return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+            } else {
+                return VK_ERROR_EXTENSION_NOT_PRESENT;
+            }
         }
 
-        if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+    }  // namespace
 
-            const std::string out = std::format("{}", STRING_ERROR + message + STRING_RESET);
-            std::cout << out;
-        }
+    void Context::makeInstance() {
+#define CONFIG_APPLAICATION_NAME "application_name"
+        const std::string applicationName = CONFIG_APPLAICATION_NAME;
 
-        return VK_FALSE;
-    }
-
-    static VkResult vkCreateDebugUtilsMessenger(
-            VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-            const VkAllocationCallbacks *pAllocator,
-            VkDebugUtilsMessengerEXT *pDebugMessenger) {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
-                instance, "vkCreateDebugUtilsMessengerEXT");
-        if (func != nullptr) {
-            return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        } else {
-            return VK_ERROR_EXTENSION_NOT_PRESENT;
-        }
-    }
-
-    Instance::Instance() {
-        const auto applicationName = "application_name";
-        const auto engineName = "engine_name";
+#define CONFIG_ENAGINE_NAME "engine_name"
+        const std::string engineName = CONFIG_ENAGINE_NAME;
 
         const VkApplicationInfo appInfo{
                 .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                .pApplicationName = applicationName,
+                .pApplicationName = applicationName.data(),
                 .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-                .pEngineName = engineName,
+                .pEngineName = engineName.data(),
                 .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-                .apiVersion = VK_API_VERSION_1_0};
+                .apiVersion = VK_API_VERSION_1_3};
 
-        const auto debugUtilsMessageSeverityFlagBits =
-                (VkDebugUtilsMessageSeverityFlagBitsEXT) (
-                        // VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
-                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
-
+        // Enumerate instance layers
         uint32_t layersCount;
         if (const auto err =
                     vkEnumerateInstanceLayerProperties(&layersCount, nullptr);
                 err != VK_SUCCESS) {
-            throw std::runtime_error(std::format(
-                    "can't enumerate instance layer properties with code: {}\n",
-                    string_VkResult(err)));
+            log::fatal("can't enumerate instance layer properties with code: {}\n",
+                       string_VkResult(err));
         } else {
-            log::debug(
+            log::debug<DEBUG_OUTPUT_INSTANCE_CPP>(
                     "vk::Instance === layer properties value: {}", layersCount);
         }
 
         layerProperties_.resize(layersCount);
 
+        // Collect instance layers
         if (const auto err = vkEnumerateInstanceLayerProperties(
                     &layersCount, layerProperties_.data());
                 err != VK_SUCCESS) {
-            throw std::runtime_error(std::format(
-                    "can't acquire instance layer properties with code: {}\n",
-                    string_VkResult(err)));
+            log::fatal("can't acquire instance layer properties with code: {}\n",
+                       string_VkResult(err));
         } else {
             log::info("vk::Instance === layer properties acquired");
         }
 
-        // Vulkan vlidation layers list to enable.
-        // On android don't forget to lay down latest vulkan binaries
-        // along side with application in src/main/jniLibs
-        // see https://developer.android.com/ndk/guides/graphics/validation-layer
-        desiredValidationLayerList_.emplace_back("VK_LAYER_KHRONOS_validation");
+        // Vulkan vlidation layers list to enable
+#define CONFIG_ENABLE_VALIDATION_LAYERS true
+        if (CONFIG_ENABLE_VALIDATION_LAYERS) {
+            desiredValidationLayerList_.push_back("VK_LAYER_KHRONOS_validation");
+
+#define  CONFIG_ENABLE_ADDITIONAL_VALIDATION_LAYERS true
+            if (CONFIG_ENABLE_ADDITIONAL_VALIDATION_LAYERS) {
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_KHRONOS_profiles");
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_KHRONOS_shader_object");
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_KHRONOS_synchronization2");
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_LUNARG_crash_diagnostic");
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_LUNARG_gfxreconstruct");
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_LUNARG_monitor");
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_LUNARG_screenshot");
+
+                // Vendor specific layers
+                // desiredValidationLayerList_.emplace_back(
+                // "VK_LAYER_MESA_device_select" );
+                // desiredValidationLayerList_.emplace_back( "VK_LAYER_NV_optimus" );
+            }
+
+            // NOTE: "VK_LAYER_RENDERDOC_Capture" must be available in system to use renderdoc
+#define CONFIG_ENABLE_API_DUNMP_VALIDATION_LAYRES true
+            if (CONFIG_ENABLE_API_DUNMP_VALIDATION_LAYRES) {
+                desiredValidationLayerList_.emplace_back(
+                        "VK_LAYER_LUNARG_api_dump");
+            }
+        }
 
         const std::vector<VkValidationFeatureEnableEXT>
                 validationFeatureEnableList = {
-                // VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
-                VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT,
+                VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
+                VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
+                VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
+                /*VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT,*/
                 VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT};
 
         VkValidationFeaturesEXT validationFeatures = {
@@ -116,13 +149,34 @@ namespace tire::vk {
                 .disabledValidationFeatureCount = 0,
                 .pDisabledValidationFeatures = nullptr};
 
-        const auto debugUtilsMessageTypeFlagBits =
+        auto debugUtilsMessageTypeFlagBits =
                 (VkDebugUtilsMessageTypeFlagBitsEXT) (
-                        // VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
                         VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
-                        VK_DEBUG_REPORT_ERROR_BIT_EXT);
+                        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT);
 
+        auto debugUtilsMessageSeverityFlagBits =
+                (VkDebugUtilsMessageSeverityFlagBitsEXT) (
+                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
+
+#define CONFIG_VERBOSE_VULKAN_OUTPUT true
+        if (CONFIG_VERBOSE_VULKAN_OUTPUT) {
+            debugUtilsMessageTypeFlagBits =
+                    (VkDebugUtilsMessageTypeFlagBitsEXT) (
+                            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT);
+
+            debugUtilsMessageSeverityFlagBits =
+                    (VkDebugUtilsMessageSeverityFlagBitsEXT) (
+                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
+        }
+
+        // Debug utils messanger creation info
         VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo = {
                 .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
                 .pNext = &validationFeatures,
@@ -134,12 +188,23 @@ namespace tire::vk {
                 .pfnUserCallback = &debugCallback,
                 .pUserData = nullptr};
 
+        // Vulkan instance extensions list
+        std::vector<const char *> desiredInstanceExtensionsList{};
+        desiredInstanceExtensionsList.emplace_back("VK_KHR_surface");
+        desiredInstanceExtensionsList.emplace_back("VK_KHR_xlib_surface");
+
+
+        if (CONFIG_ENABLE_VALIDATION_LAYERS) {
+            desiredInstanceExtensionsList.emplace_back(
+                    VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        }
+
+        // Instance creation info
         VkInstanceCreateInfo instanceCreateInfo{};
         instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCreateInfo.pApplicationInfo = &appInfo;
 
-        // NOTE: force enable validation layers
-        if (true) {
+        if (CONFIG_ENABLE_VALIDATION_LAYERS) {
             instanceCreateInfo.enabledLayerCount =
                     static_cast<uint32_t>( desiredValidationLayerList_.size());
             instanceCreateInfo.ppEnabledLayerNames =
@@ -148,84 +213,61 @@ namespace tire::vk {
             *) &debugUtilsMessengerCreateInfo;
         }
 
-        uint32_t extCount{};
-        if (const auto err = vkEnumerateInstanceExtensionProperties(
-                    nullptr, &extCount, nullptr);
-                err != VK_SUCCESS) {
-            throw std::runtime_error(
-                    std::format("can't enumerate instance extension "
-                                "properties with code: {}\n",
-                                string_VkResult(err)));
-        } else {
-            log::debug(
-                    "vk::Instance === extension properties value: {}", extCount);
-        }
-
-        extensionProperties_.resize(extCount);
-
-        if (const auto err = vkEnumerateInstanceExtensionProperties(
-                    nullptr, &extCount, extensionProperties_.data());
-                err != VK_SUCCESS) {
-            throw std::runtime_error(
-                    std::format("can't acquire instance extension properties "
-                                "with code: {}\n",
-                                static_cast<int>(err)));
-        } else {
-            log::info("vk::Instance === extension properties acquired");
-        }
-
-        // Vulkan instance extensions list
-        std::vector<const char *> desiredInstanceExtensionsList{};
-        desiredInstanceExtensionsList.emplace_back("VK_KHR_surface");
-        desiredInstanceExtensionsList.emplace_back("VK_KHR_android_surface");
-        desiredInstanceExtensionsList.emplace_back(
-                VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-        desiredInstanceExtensionsList.emplace_back(
-                VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-
         instanceCreateInfo.enabledExtensionCount =
                 static_cast<uint32_t>( desiredInstanceExtensionsList.size());
         instanceCreateInfo.ppEnabledExtensionNames =
                 desiredInstanceExtensionsList.data();
 
-        // instance creation
+        // Enumerate instance extensions properties
+        uint32_t extCount{};
+        if (const auto err = vkEnumerateInstanceExtensionProperties(
+                    nullptr, &extCount, nullptr);
+                err != VK_SUCCESS) {
+            log::fatal(
+                    "can't enumerate instance extension "
+                    "properties with code: {}\n",
+                    string_VkResult(err));
+        } else {
+            log::debug<DEBUG_OUTPUT_INSTANCE_CPP>(
+                    "vk::Instance === extension properties value: {}", extCount);
+        }
+
+        extensionProperties_.resize(extCount);
+
+        // Collect instance extensions properties
+        if (const auto err = vkEnumerateInstanceExtensionProperties(
+                    nullptr, &extCount, extensionProperties_.data());
+                err != VK_SUCCESS) {
+            log::fatal(
+                    "can't acquire instance extension properties "
+                    "with code: {}\n",
+                    string_VkResult(err));
+        } else {
+            log::info("vk::Instance === extension properties aquired");
+        }
+
+        // Create vulkan instance
         if (const auto err =
                     vkCreateInstance(&instanceCreateInfo, nullptr, &instance_);
                 err != VK_SUCCESS) {
-            throw std::runtime_error(
-                    std::format("can't create vk instance with code: {}\n",
-                                string_VkResult(err)));
+            log::fatal("can't create vk instance with code: {}\n",
+                       string_VkResult(err));
         } else {
             log::info("vk::Instance === vulkan instance created!");
         }
 
-        // NOTE: force enable validation layers
-        if (true) {
+        // Create debug utils messanger
+        if (CONFIG_ENABLE_VALIDATION_LAYERS) {
             if (const auto err = vkCreateDebugUtilsMessenger(
                         instance_, &debugUtilsMessengerCreateInfo, nullptr,
                         &debugMessenger_);
                     err != VK_SUCCESS) {
-                throw std::runtime_error(
-                        std::format("failed to set up debug messenger with code {}!\n",
-                                    string_VkResult(err)));
+                log::fatal("failed to set up debug messenger with code {}!\n",
+                           string_VkResult(err));
             } else {
-                log::debug(
+                log::debug<DEBUG_OUTPUT_INSTANCE_CPP>(
                         "vk::Instance === vkCreateDebugUtilsMessenger success!");
             }
         }
     }
-
-    Instance::~Instance() {
-        vkDestroyInstance(instance_, nullptr);
-    }
-
-    VkInstance Instance::handle() const {
-        return instance_;
-    }
-
-    std::pair<uint32_t, char const *const *> Instance::validationLayers() const {
-        return std::make_pair(desiredValidationLayerList_.size(),
-                              desiredValidationLayerList_.data());
-    }
-
 }  // namespace tire::vk
